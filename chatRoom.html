@@ -1,0 +1,73 @@
+<html>
+
+<head>
+    <title>
+        Chat room Application
+    </title>
+</head>
+
+<!-- CSS library -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+
+<!-- jQuery library -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+
+<!-- JavaScript -->
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+<!-- socket.io -->
+<script src="/socket.io/socket.io.js"></script>
+
+<body> charting from here!!!
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-8">
+                <div class="chat" id="chat">
+                </div>
+                <form id="messageForm">
+                    <div class="form_group">
+                        <textarea name="form-control" id="message" cols="30" rows="10" placeholder="Enter message"></textarea>
+                        <br/>
+                        <input type="submit" class="btn btn-primary" value="POST">
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <script>
+        $(function () {
+            var socket = io.connect();
+            //receiving all messages after connecting to the server
+            //socket.on('all messages', function (result){
+               // $chat.empty();
+              // $chat.append('<div class="well">'+result[0].content+' </div>');
+            //});
+
+            var $messageForm = $('#messageForm');
+            var $message = $('#message');
+            var $chat = $('#chat');
+            $messageForm.submit(function (e) {
+                e.preventDefault();
+
+                //sending the message from the form
+                socket.emit('send message', $message.val());
+                //clearing the message after sending it
+                $message.val('');
+
+            });
+
+            //receiving a new message 
+            socket.on('new message', function (data){
+               $chat.append('<div class="well">'+data.msg+' </div>');
+            });
+/*
+             //receiving all messages when connected 
+             socket.on('all messages', function (data){
+               $chat.append('<div class="well">'+data[0].content+' </div>');
+            });
+*/
+
+        })
+    </script>
+</body>
+</htm>
