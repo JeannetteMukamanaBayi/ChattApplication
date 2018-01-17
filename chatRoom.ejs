@@ -1,0 +1,179 @@
+<html>
+
+<head>
+    <title>
+        Chat room Application
+    </title>
+</head>
+
+
+<!-- CSS library -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+
+
+<style>
+    body {
+        background-color: rgb(252, 249, 249);
+    }
+
+
+    h1 {
+        color: maroon;
+        margin-left: 40px;
+    }
+
+    #chatRoom {
+        background-color: rgb(116, 113, 113);
+        width: 100%;
+        padding-top: 50px;
+        padding-right: 30px;
+        padding-bottom: 0px;
+        padding-left: 5px;
+        margin-top: 50px;
+        margin-right: 80%;
+        margin-bottom: 0px;
+        margin-left: 0px;
+        margin-top: 50px;
+    }
+
+    #message {
+        background-color: rgb(49, 108, 112);
+        width: 100%;
+        padding-top: 10px;
+        padding-right: 30px;
+        padding-bottom: 10px;
+        margin-top: 01px;
+        margin-right: 80%;
+        margin-bottom: 10px;
+        margin-left: 0px;
+        margin-top: 0px;
+		height: 100px;
+    }
+
+    #form {
+        padding-top: -10px;
+        padding-right: 30px;
+        padding-bottom: 0px;
+		position: absolute;
+		width: 100%;
+    }
+
+    #time {
+        float: right;
+    }
+	#timeStamp {
+        float: right;
+    }
+	
+	#button{
+	align="center";
+	}
+</style>
+
+<!-- jQuery library -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+
+<!-- JavaScript -->
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+<!-- socket.io -->
+<script src="/socket.io/socket.io.js"></script>
+
+<body>
+    <div class="container">
+        <ul class="nav nav-tabs">
+            <li>
+                <a href="/">Home</a>
+            </li>
+            <li>
+                <a href="register">Register</a>
+            </li>
+            <li>
+                <a href="login">Login</a>
+            </li>
+            <li>
+                <a href="#">About</a>
+            </li>
+        </ul>
+    </div>
+    <div class="container" id="container">
+        <div class="row">
+            <div class="col-sm-8">
+                <div >
+                    <div id="chatRoom"> </div>
+                </div>
+
+                <form id="form">
+                    <div class="form_group">
+                        <textarea name="form-control" id="message" cols="30" rows="10" placeholder="Enter message"></textarea>
+                        <br/>
+                        <input type="submit" class="btn btn-primary" id= "button" value="POST">
+                    </div>
+                </form>
+            </div>
+        </div>
+		
+        <script>
+            $(function () {
+                var socket = io.connect();
+                var $form = $('#form');
+                var $message = $('#message');
+                var $chat = $('#chatRoom');
+				var userName= '<%-userName%>';
+			
+            	/* feching all old messages and user's name after successfull login  */
+				var oldChat= <%-oldMessages%>;
+				for(var i in oldChat){
+					$chat.append('<strong>' + oldChat[i].sender + '</strong>');
+                    $chat.append($("  "));
+                    $chat.append('<div id="time">' + oldChat[i].timeStamp + '</div>');
+                    $chat.append('<div>' + '<div>' + oldChat[i].content + ' </div>');
+                    $chat.append($("<br />"));
+				}
+				
+				var message = [];
+				message[0]= userName;
+				
+                $form.submit(function (callbck) {
+                    callbck.preventDefault();
+					
+                    //sending the message from the form
+					message[1]= $message.val();
+                    socket.emit('send message', message);
+					
+
+                    //clearing the message after sending it
+                    $message.val('');
+
+                });
+
+                //receiving a new message 
+                socket.on('new message', function (data) {
+				
+                    $chat.append('<strong>' + data.userName+ '</strong>');
+                    $chat.append($("  "));
+                    $chat.append('<div id="time">' + data.time + '</div>');
+                    $chat.append('<div>' + '<div>' + data.message + ' </div>');
+                    $chat.append($("<br />"));
+              
+                });
+				
+			 //receiving a new user 
+                socket.on('new user', function (data) {
+                    $chat.append('<strong>' +data+ ' has joined the chat' + '</strong>');
+					$chat.append($("  "));
+                    $chat.append($("<br />"));
+              
+                });
+				
+				//a user leaving the chat
+                socket.on('user left', function (data) {
+                    $chat.append('<strong>' +data+ ' has left the chat' + '</strong>');
+					$chat.append($("  "));
+                    $chat.append($("<br />"));
+              
+                });
+            })
+        </script>
+</body>
+</htm>
